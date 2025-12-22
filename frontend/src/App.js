@@ -205,7 +205,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg sticky top-0 z-50">
+    <header className={`${darkMode ? "bg-gray-800" : "bg-gradient-to-r from-green-600 to-green-500"} text-white shadow-lg sticky top-0 z-50`}>
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
@@ -231,7 +231,9 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2">
+          <DarkModeToggle className="mr-2" />
+          
           <button
             onClick={() => navigate("/add-amal")}
             className="p-2 hover:bg-white/10 rounded-full transition-colors"
@@ -248,7 +250,7 @@ const Header = () => {
               className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
               data-testid="user-dropdown-btn"
             >
-              <div className="w-8 h-8 bg-green-300 rounded-full flex items-center justify-center text-green-800 font-semibold">
+              <div className={`w-8 h-8 ${darkMode ? "bg-green-600" : "bg-green-300"} rounded-full flex items-center justify-center ${darkMode ? "text-white" : "text-green-800"} font-semibold`}>
                 {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
               </div>
               <span className="hidden sm:block">{user?.full_name?.split(" ")[0] || "User"}</span>
@@ -258,10 +260,10 @@ const Header = () => {
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 text-gray-700">
+              <div className={`absolute right-0 mt-2 w-48 ${darkMode ? "bg-gray-800 text-gray-200" : "bg-white text-gray-700"} rounded-lg shadow-lg py-2`}>
                 <Link
                   to="/profile"
-                  className="block px-4 py-2 hover:bg-gray-100"
+                  className={`block px-4 py-2 ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
                   onClick={() => setDropdownOpen(false)}
                   data-testid="profile-link"
                 >
@@ -269,19 +271,19 @@ const Header = () => {
                 </Link>
                 <Link
                   to="/tracker"
-                  className="block px-4 py-2 hover:bg-gray-100"
+                  className={`block px-4 py-2 ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}
                   onClick={() => setDropdownOpen(false)}
                   data-testid="tracker-link"
                 >
                   📊 Tracker
                 </Link>
-                <hr className="my-2" />
+                <hr className={`my-2 ${darkMode ? "border-gray-700" : ""}`} />
                 <button
                   onClick={() => {
                     logout();
                     navigate("/login");
                   }}
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
+                  className={`block w-full text-left px-4 py-2 ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"} text-red-500`}
                   data-testid="logout-btn"
                 >
                   🚪 Logout
@@ -293,7 +295,7 @@ const Header = () => {
       </div>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden flex justify-around py-2 border-t border-white/20">
+      <nav className={`md:hidden flex justify-around py-2 border-t ${darkMode ? "border-gray-700" : "border-white/20"}`}>
         {navItems.map((item) => (
           <Link
             key={item.path}
