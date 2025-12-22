@@ -552,6 +552,7 @@ const RegisterPage = () => {
           </form>
 
           <p className="text-center mt-6 text-gray-600">
+          <p className={`text-center mt-6 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
             Already have an account?{" "}
             <Link to="/login" className="text-green-600 font-semibold hover:underline">
               Login
@@ -573,6 +574,7 @@ const ForgotPasswordPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
 
   const handleRequestCode = async (e) => {
