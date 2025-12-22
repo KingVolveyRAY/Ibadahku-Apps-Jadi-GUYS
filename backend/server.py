@@ -207,8 +207,9 @@ async def register(user_data: UserCreate):
         )
     
     # Create new user
+    user_id = str(uuid.uuid4())
     user_dict = {
-        "id": str(uuid.uuid4()),
+        "id": user_id,
         "email": user_data.email,
         "full_name": user_data.full_name,
         "hashed_password": get_password_hash(user_data.password),
@@ -219,16 +220,17 @@ async def register(user_data: UserCreate):
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     
-    await db.users.insert_one(user_dict)
+    # Insert without getting the result with _id
+    await db.users.insert_one(user_dict.copy())
     
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user_dict["id"]}, expires_delta=access_token_expires
+        data={"sub": user_id}, expires_delta=access_token_expires
     )
     
-    # Return user without password
-    user_response = {k: v for k, v in user_dict.items() if k != "hashed_password"}
+    # Return user without password and _id
+    user_response = {k: v for k, v in user_dict.items() if k not in ["hashed_password", "_id"]}
     
     return Token(access_token=access_token, token_type="bearer", user=user_response)
 
