@@ -551,7 +551,6 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          <p className="text-center mt-6 text-gray-600">
           <p className={`text-center mt-6 ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
             Already have an account?{" "}
             <Link to="/login" className="text-green-600 font-semibold hover:underline">
