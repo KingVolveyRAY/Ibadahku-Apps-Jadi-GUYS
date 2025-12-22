@@ -730,6 +730,7 @@ const ForgotPasswordPage = () => {
 // Home Page
 const HomePage = () => {
   const { user, token } = useAuth();
+  const { darkMode } = useTheme();
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [hijriDate, setHijriDate] = useState(null);
   const [dailyAmals, setDailyAmals] = useState([]);
@@ -797,7 +798,7 @@ const HomePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
         <Header />
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
@@ -809,12 +810,12 @@ const HomePage = () => {
   const currentPrayer = getCurrentPrayer();
 
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="home-page">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`} data-testid="home-page">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Greeting Card */}
-        <div className="bg-gradient-to-r from-green-500 to-green-400 rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
           <p className="text-green-100">Assalamu'alaikum,</p>
           <h1 className="text-2xl font-bold mb-2">{user?.full_name}</h1>
           <p className="text-green-100 text-sm">{getGreeting()}</p>
