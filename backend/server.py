@@ -1,15 +1,18 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, status
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
-
+from datetime import datetime, timezone, timedelta
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import httpx
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -17,54 +20,599 @@ load_dotenv(ROOT_DIR / '.env')
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[os.environ.get('DB_NAME', 'bedahni_db')]
 
-# Create the main app without a prefix
-app = FastAPI()
+# JWT Configuration
+SECRET_KEY = os.environ.get('SECRET_KEY', 'bedahni-secret-key-2025-very-secure')
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Security
+security = HTTPBearer()
+
+# Create the main app
+app = FastAPI(title="BedahNi API", version="1.0.0")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
+# ==================== MODELS ====================
+
+class UserBase(BaseModel):
+    email: EmailStr
+    full_name: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = "Indonesia"
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    country: Optional[str] = None
+
+class User(UserBase):
+    model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class UserInDB(User):
+    hashed_password: str
 
-# Add your routes to the router instead of directly to app
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user: dict
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
+# Amal/Activity Models
+class AmalCreate(BaseModel):
+    name: str
+    notes: Optional[str] = None
+    scheduled_date: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    repeat_daily: bool = False
+
+class Amal(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    name: str
+    notes: Optional[str] = None
+    scheduled_date: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    repeat_daily: bool = False
+    completed: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class AmalUpdate(BaseModel):
+    name: Optional[str] = None
+    notes: Optional[str] = None
+    scheduled_date: Optional[str] = None
+    scheduled_time: Optional[str] = None
+    repeat_daily: Optional[bool] = None
+    completed: Optional[bool] = None
+
+# Daily Note Model
+class DailyNoteCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    notes: Optional[str] = None
+    reflections: Optional[str] = None
+
+class DailyNote(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    date: str
+    notes: Optional[str] = None
+    reflections: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Prayer Tracking
+class PrayerTrackCreate(BaseModel):
+    date: str  # YYYY-MM-DD
+    subuh: bool = False
+    dzuhur: bool = False
+    ashar: bool = False
+    maghrib: bool = False
+    isya: bool = False
+
+class PrayerTrack(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    date: str
+    subuh: bool = False
+    dzuhur: bool = False
+    ashar: bool = False
+    maghrib: bool = False
+    isya: bool = False
+
+# ==================== HELPER FUNCTIONS ====================
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "hashed_password": 0})
+    if user is None:
+        raise credentials_exception
+    return user
+
+# ==================== AUTH ROUTES ====================
+
+@api_router.post("/auth/register", response_model=Token)
+async def register(user_data: UserCreate):
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    
+    # Create new user
+    user_dict = {
+        "id": str(uuid.uuid4()),
+        "email": user_data.email,
+        "full_name": user_data.full_name,
+        "hashed_password": get_password_hash(user_data.password),
+        "phone": None,
+        "address": None,
+        "city": None,
+        "country": "Indonesia",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.users.insert_one(user_dict)
+    
+    # Create access token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user_dict["id"]}, expires_delta=access_token_expires
+    )
+    
+    # Return user without password
+    user_response = {k: v for k, v in user_dict.items() if k != "hashed_password"}
+    
+    return Token(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.post("/auth/login", response_model=Token)
+async def login(user_data: UserLogin):
+    user = await db.users.find_one({"email": user_data.email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password"
+        )
+    
+    if not verify_password(user_data.password, user["hashed_password"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password"
+        )
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user["id"]}, expires_delta=access_token_expires
+    )
+    
+    user_response = {k: v for k, v in user.items() if k not in ["hashed_password", "_id"]}
+    
+    return Token(access_token=access_token, token_type="bearer", user=user_response)
+
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: ForgotPasswordRequest):
+    user = await db.users.find_one({"email": request.email})
+    if not user:
+        # Don't reveal if email exists or not
+        return {"message": "If email exists, a reset code has been sent"}
+    
+    # Generate reset code (in production, send via email)
+    reset_code = str(uuid.uuid4())[:6].upper()
+    
+    await db.password_resets.update_one(
+        {"email": request.email},
+        {"$set": {"code": reset_code, "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True
+    )
+    
+    # In production, send email here
+    logger.info(f"Password reset code for {request.email}: {reset_code}")
+    
+    return {"message": "If email exists, a reset code has been sent", "code": reset_code}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: ResetPasswordRequest):
+    reset_record = await db.password_resets.find_one({
+        "email": request.email,
+        "code": request.code
+    })
+    
+    if not reset_record:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid reset code"
+        )
+    
+    # Update password
+    await db.users.update_one(
+        {"email": request.email},
+        {"$set": {"hashed_password": get_password_hash(request.new_password)}}
+    )
+    
+    # Delete reset record
+    await db.password_resets.delete_one({"email": request.email})
+    
+    return {"message": "Password reset successfully"}
+
+# ==================== USER ROUTES ====================
+
+@api_router.get("/user/me")
+async def get_me(current_user: dict = Depends(get_current_user)):
+    return current_user
+
+@api_router.put("/user/me")
+async def update_me(user_update: UserUpdate, current_user: dict = Depends(get_current_user)):
+    update_data = {k: v for k, v in user_update.model_dump().items() if v is not None}
+    
+    if update_data:
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": update_data}
+        )
+    
+    updated_user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "hashed_password": 0})
+    return updated_user
+
+# ==================== PRAYER TIMES ROUTES ====================
+
+@api_router.get("/prayer-times")
+async def get_prayer_times(latitude: float = -6.2088, longitude: float = 106.8456, method: int = 20):
+    """Get prayer times from Aladhan API. Default location is Jakarta."""
+    try:
+        today = datetime.now().strftime("%d-%m-%Y")
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.aladhan.com/v1/timings/{today}",
+                params={
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "method": method  # 20 = Kemenag Indonesia
+                }
+            )
+            data = response.json()
+            
+            if data["code"] == 200:
+                timings = data["data"]["timings"]
+                date_info = data["data"]["date"]
+                
+                return {
+                    "timings": {
+                        "Subuh": timings["Fajr"],
+                        "Terbit": timings["Sunrise"],
+                        "Dzuhur": timings["Dhuhr"],
+                        "Ashar": timings["Asr"],
+                        "Maghrib": timings["Maghrib"],
+                        "Isya": timings["Isha"]
+                    },
+                    "date": {
+                        "gregorian": date_info["gregorian"],
+                        "hijri": date_info["hijri"]
+                    }
+                }
+            else:
+                raise HTTPException(status_code=500, detail="Failed to fetch prayer times")
+    except Exception as e:
+        logger.error(f"Error fetching prayer times: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/prayer-times/monthly")
+async def get_monthly_prayer_times(
+    year: int = None,
+    month: int = None,
+    latitude: float = -6.2088,
+    longitude: float = 106.8456,
+    method: int = 20
+):
+    """Get monthly prayer times calendar."""
+    if year is None:
+        year = datetime.now().year
+    if month is None:
+        month = datetime.now().month
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.aladhan.com/v1/calendar/{year}/{month}",
+                params={
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "method": method
+                }
+            )
+            data = response.json()
+            
+            if data["code"] == 200:
+                return data["data"]
+            else:
+                raise HTTPException(status_code=500, detail="Failed to fetch calendar")
+    except Exception as e:
+        logger.error(f"Error fetching monthly calendar: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== HIJRI CALENDAR ROUTES ====================
+
+@api_router.get("/hijri/today")
+async def get_hijri_today():
+    """Get today's Hijri date."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("https://api.aladhan.com/v1/gToH")
+            data = response.json()
+            
+            if data["code"] == 200:
+                return data["data"]["hijri"]
+            else:
+                raise HTTPException(status_code=500, detail="Failed to fetch Hijri date")
+    except Exception as e:
+        logger.error(f"Error fetching Hijri date: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/hijri/convert")
+async def convert_to_hijri(date: str):
+    """Convert Gregorian date to Hijri. Format: DD-MM-YYYY"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://api.aladhan.com/v1/gToH/{date}")
+            data = response.json()
+            
+            if data["code"] == 200:
+                return data["data"]["hijri"]
+            else:
+                raise HTTPException(status_code=500, detail="Failed to convert date")
+    except Exception as e:
+        logger.error(f"Error converting date: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/hijri/calendar")
+async def get_hijri_calendar(year: int, month: int):
+    """Get Hijri calendar for a month."""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://api.aladhan.com/v1/hToGCalendar/{month}/{year}")
+            data = response.json()
+            
+            if data["code"] == 200:
+                return data["data"]
+            else:
+                raise HTTPException(status_code=500, detail="Failed to fetch Hijri calendar")
+    except Exception as e:
+        logger.error(f"Error fetching Hijri calendar: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== AMAL/ACTIVITY ROUTES ====================
+
+@api_router.post("/amal", response_model=Amal)
+async def create_amal(amal_data: AmalCreate, current_user: dict = Depends(get_current_user)):
+    amal_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user["id"],
+        **amal_data.model_dump(),
+        "completed": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.amals.insert_one(amal_dict)
+    return Amal(**amal_dict)
+
+@api_router.get("/amal", response_model=List[Amal])
+async def get_amals(
+    date: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    query = {"user_id": current_user["id"]}
+    if date:
+        query["scheduled_date"] = date
+    
+    amals = await db.amals.find(query, {"_id": 0}).to_list(100)
+    return amals
+
+@api_router.put("/amal/{amal_id}", response_model=Amal)
+async def update_amal(
+    amal_id: str,
+    amal_update: AmalUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    update_data = {k: v for k, v in amal_update.model_dump().items() if v is not None}
+    
+    if update_data:
+        await db.amals.update_one(
+            {"id": amal_id, "user_id": current_user["id"]},
+            {"$set": update_data}
+        )
+    
+    updated_amal = await db.amals.find_one(
+        {"id": amal_id, "user_id": current_user["id"]},
+        {"_id": 0}
+    )
+    
+    if not updated_amal:
+        raise HTTPException(status_code=404, detail="Amal not found")
+    
+    return Amal(**updated_amal)
+
+@api_router.delete("/amal/{amal_id}")
+async def delete_amal(amal_id: str, current_user: dict = Depends(get_current_user)):
+    result = await db.amals.delete_one({"id": amal_id, "user_id": current_user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Amal not found")
+    return {"message": "Amal deleted successfully"}
+
+# ==================== DAILY NOTES ROUTES ====================
+
+@api_router.post("/daily-notes", response_model=DailyNote)
+async def create_or_update_daily_note(
+    note_data: DailyNoteCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    existing = await db.daily_notes.find_one({
+        "user_id": current_user["id"],
+        "date": note_data.date
+    })
+    
+    if existing:
+        await db.daily_notes.update_one(
+            {"id": existing["id"]},
+            {"$set": note_data.model_dump()}
+        )
+        updated = await db.daily_notes.find_one({"id": existing["id"]}, {"_id": 0})
+        return DailyNote(**updated)
+    else:
+        note_dict = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            **note_data.model_dump(),
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.daily_notes.insert_one(note_dict)
+        return DailyNote(**note_dict)
+
+@api_router.get("/daily-notes/{date}", response_model=Optional[DailyNote])
+async def get_daily_note(date: str, current_user: dict = Depends(get_current_user)):
+    note = await db.daily_notes.find_one(
+        {"user_id": current_user["id"], "date": date},
+        {"_id": 0}
+    )
+    return DailyNote(**note) if note else None
+
+# ==================== PRAYER TRACKING ROUTES ====================
+
+@api_router.post("/prayer-track", response_model=PrayerTrack)
+async def create_or_update_prayer_track(
+    track_data: PrayerTrackCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    existing = await db.prayer_tracks.find_one({
+        "user_id": current_user["id"],
+        "date": track_data.date
+    })
+    
+    if existing:
+        await db.prayer_tracks.update_one(
+            {"id": existing["id"]},
+            {"$set": track_data.model_dump()}
+        )
+        updated = await db.prayer_tracks.find_one({"id": existing["id"]}, {"_id": 0})
+        return PrayerTrack(**updated)
+    else:
+        track_dict = {
+            "id": str(uuid.uuid4()),
+            "user_id": current_user["id"],
+            **track_data.model_dump()
+        }
+        await db.prayer_tracks.insert_one(track_dict)
+        return PrayerTrack(**track_dict)
+
+@api_router.get("/prayer-track/{date}", response_model=Optional[PrayerTrack])
+async def get_prayer_track(date: str, current_user: dict = Depends(get_current_user)):
+    track = await db.prayer_tracks.find_one(
+        {"user_id": current_user["id"], "date": date},
+        {"_id": 0}
+    )
+    return PrayerTrack(**track) if track else None
+
+@api_router.get("/prayer-track/stats/weekly")
+async def get_weekly_prayer_stats(current_user: dict = Depends(get_current_user)):
+    """Get prayer completion stats for the last 7 days."""
+    today = datetime.now()
+    dates = [(today - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+    
+    tracks = await db.prayer_tracks.find(
+        {"user_id": current_user["id"], "date": {"$in": dates}},
+        {"_id": 0}
+    ).to_list(7)
+    
+    total_prayers = 0
+    completed_prayers = 0
+    
+    for track in tracks:
+        for prayer in ["subuh", "dzuhur", "ashar", "maghrib", "isya"]:
+            total_prayers += 1
+            if track.get(prayer, False):
+                completed_prayers += 1
+    
+    return {
+        "total": total_prayers,
+        "completed": completed_prayers,
+        "percentage": round((completed_prayers / total_prayers * 100) if total_prayers > 0 else 0, 1),
+        "tracks": tracks
+    }
+
+# ==================== ROOT ROUTES ====================
+
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "BedahNi API v1.0.0"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+@api_router.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -76,13 +624,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
