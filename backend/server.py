@@ -610,7 +610,7 @@ async def get_weekly_prayer_stats(current_user: dict = Depends(get_current_user)
 
 @api_router.get("/")
 async def root():
-    return {"message": "BedahNi API v1.0.0"}
+    return {"message": "IbadahKu API v1.0.0"}
 
 @api_router.get("/health")
 async def health_check():
