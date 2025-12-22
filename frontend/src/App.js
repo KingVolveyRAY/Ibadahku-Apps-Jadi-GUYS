@@ -108,8 +108,8 @@ const Header = () => {
     <header className="bg-gradient-to-r from-green-600 to-green-500 text-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-2xl">🕌</span>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+            <img src="https://customer-assets.emergentagent.com/job_50cfe53e-4256-4482-9821-00551ab1b6e3/artifacts/2nrh84x0_WhatsApp%20Image%202025-12-23%20at%2001.25.53.jpeg" alt="IbadahKu" className="w-full h-full object-cover" />
           </div>
           <span className="font-bold text-xl">IbadahKu</span>
         </div>
