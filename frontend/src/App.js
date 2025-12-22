@@ -831,14 +831,14 @@ const HomePage = () => {
 
         {/* Current Prayer */}
         {currentPrayer && (
-          <div className="bg-white rounded-xl p-4 mb-6 shadow-sm border border-green-100">
+          <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-green-100"} rounded-xl p-4 mb-6 shadow-sm border`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">Waktu Shalat Sekarang</p>
+                <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Waktu Shalat Sekarang</p>
                 <h3 className="text-xl font-bold text-green-600">{currentPrayer.name}</h3>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-bold text-gray-800">{currentPrayer.time}</p>
+                <p className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>{currentPrayer.time}</p>
               </div>
             </div>
           </div>
@@ -847,7 +847,7 @@ const HomePage = () => {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+            className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow`}
             onClick={() => navigate("/prayer")}
           >
             <div className="flex items-center justify-between mb-2">
@@ -856,14 +856,14 @@ const HomePage = () => {
                 {prayerStats?.percentage || 0}%
               </span>
             </div>
-            <p className="text-gray-600 text-sm">Shalat Minggu Ini</p>
-            <p className="text-lg font-bold text-gray-800">
+            <p className={`${darkMode ? "text-gray-400" : "text-gray-600"} text-sm`}>Shalat Minggu Ini</p>
+            <p className={`text-lg font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>
               {prayerStats?.completed || 0}/{prayerStats?.total || 35}
             </p>
           </div>
 
           <div
-            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow"
+            className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl p-4 shadow-sm border cursor-pointer hover:shadow-md transition-shadow`}
             onClick={() => navigate("/tracker")}
           >
             <div className="flex items-center justify-between mb-2">
@@ -872,17 +872,17 @@ const HomePage = () => {
                 {dailyAmals.filter(a => a.completed).length}/{dailyAmals.length}
               </span>
             </div>
-            <p className="text-gray-600 text-sm">Amal Hari Ini</p>
-            <p className="text-lg font-bold text-gray-800">
+            <p className={`${darkMode ? "text-gray-400" : "text-gray-600"} text-sm`}>Amal Hari Ini</p>
+            <p className={`text-lg font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>
               {dailyAmals.filter(a => a.completed).length} selesai
             </p>
           </div>
         </div>
 
         {/* Daily Reminders */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl p-4 shadow-sm border`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Daily Reminders/Amal</h3>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Daily Reminders/Amal</h3>
             <button
               onClick={() => navigate("/add-amal")}
               className="text-green-500 text-sm font-medium hover:underline"
@@ -892,7 +892,7 @@ const HomePage = () => {
           </div>
 
           {dailyAmals.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
+            <div className={`text-center py-8 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
               <p className="text-4xl mb-2">📝</p>
               <p>Belum ada amal hari ini</p>
               <button
@@ -908,14 +908,16 @@ const HomePage = () => {
                 <div
                   key={amal.id}
                   className={`flex items-center p-3 rounded-lg ${
-                    amal.completed ? "bg-green-50" : "bg-gray-50"
+                    amal.completed 
+                      ? darkMode ? "bg-green-900/30" : "bg-green-50" 
+                      : darkMode ? "bg-gray-700" : "bg-gray-50"
                   }`}
                 >
                   <div
                     className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center ${
                       amal.completed
                         ? "bg-green-500 border-green-500"
-                        : "border-gray-300"
+                        : darkMode ? "border-gray-500" : "border-gray-300"
                     }`}
                   >
                     {amal.completed && (
@@ -924,7 +926,7 @@ const HomePage = () => {
                       </svg>
                     )}
                   </div>
-                  <span className={amal.completed ? "line-through text-gray-400" : "text-gray-700"}>
+                  <span className={amal.completed ? "line-through text-gray-400" : darkMode ? "text-gray-200" : "text-gray-700"}>
                     {amal.name}
                   </span>
                 </div>
