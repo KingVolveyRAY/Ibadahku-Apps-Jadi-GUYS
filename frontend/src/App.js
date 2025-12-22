@@ -109,9 +109,9 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-2xl">🌿</span>
+            <span className="text-2xl">🕌</span>
           </div>
-          <span className="font-bold text-xl">BedahNi</span>
+          <span className="font-bold text-xl">IbadahKu</span>
         </div>
 
         <nav className="hidden md:flex items-center space-x-1">
