@@ -937,26 +937,28 @@ const HomePage = () => {
 };
 
 // Export remaining components
-export { LoginPage, RegisterPage, ForgotPasswordPage, HomePage, Header, AuthProvider, ProtectedRoute };
+export { LoginPage, RegisterPage, ForgotPasswordPage, HomePage, Header, AuthProvider, ProtectedRoute, ThemeProvider };
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-          <Route path="/prayer" element={<ProtectedRoute><PrayerPage /></ProtectedRoute>} />
-          <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/tracker" element={<ProtectedRoute><TrackerPage /></ProtectedRoute>} />
-          <Route path="/add-amal" element={<ProtectedRoute><AddAmalPage /></ProtectedRoute>} />
-          <Route path="/" element={<Navigate to="/login" />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+            <Route path="/prayer" element={<ProtectedRoute><PrayerPage /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/tracker" element={<ProtectedRoute><TrackerPage /></ProtectedRoute>} />
+            <Route path="/add-amal" element={<ProtectedRoute><AddAmalPage /></ProtectedRoute>} />
+            <Route path="/" element={<Navigate to="/login" />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
