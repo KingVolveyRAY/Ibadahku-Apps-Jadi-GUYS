@@ -243,8 +243,8 @@ const LoginPage = () => {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
-              <span className="text-4xl">🕌</span>
+            <div className="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4 overflow-hidden">
+              <img src="https://customer-assets.emergentagent.com/job_50cfe53e-4256-4482-9821-00551ab1b6e3/artifacts/2nrh84x0_WhatsApp%20Image%202025-12-23%20at%2001.25.53.jpeg" alt="IbadahKu" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-3xl font-bold text-white">IbadahKu</h1>
             <p className="text-green-100 mt-2">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
