@@ -244,9 +244,9 @@ const LoginPage = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-white rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
-              <span className="text-4xl">🌿</span>
+              <span className="text-4xl">🕌</span>
             </div>
-            <h1 className="text-3xl font-bold text-white">BedahNi</h1>
+            <h1 className="text-3xl font-bold text-white">IbadahKu</h1>
             <p className="text-green-100 mt-2">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
           </div>
 
