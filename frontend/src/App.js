@@ -1364,52 +1364,11 @@ const CalendarPage = () => {
     </div>
   );
 };
-                  {date?.getDate()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Selected Date Info */}
-          <div className="space-y-4">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">Tanggal Terpilih</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-xl">📅</span>
-                  <span className="text-gray-700">
-                    {selectedDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
-                {hijriInfo && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xl">🌙</span>
-                    <span className="text-gray-700">
-                      {hijriInfo.day} {hijriInfo.month.en} {hijriInfo.year} H
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Islamic Events */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">Daily Saved Notes</h3>
-              <div className="text-center py-6 text-gray-400">
-                <span className="text-3xl">🌙</span>
-                <p className="mt-2 text-sm">Tidak ada catatan</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
 
 // Profile Page
 const ProfilePage = () => {
   const { user, token, updateUser, logout } = useAuth();
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -1437,14 +1396,14 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="profile-page">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`} data-testid="profile-page">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-400 rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-green-500 text-3xl font-bold">
+            <div className={`w-20 h-20 ${darkMode ? "bg-gray-700" : "bg-white"} rounded-full flex items-center justify-center ${darkMode ? "text-green-400" : "text-green-500"} text-3xl font-bold`}>
               {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
             </div>
             <div>
