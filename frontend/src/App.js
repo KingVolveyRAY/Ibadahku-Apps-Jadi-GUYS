@@ -1552,6 +1552,7 @@ const ProfilePage = () => {
 // Tracker Page
 const TrackerPage = () => {
   const { token } = useAuth();
+  const { darkMode } = useTheme();
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [prayerTrack, setPrayerTrack] = useState(null);
   const [amals, setAmals] = useState([]);
@@ -1625,7 +1626,7 @@ const TrackerPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
         <Header />
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
@@ -1639,12 +1640,12 @@ const TrackerPage = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="tracker-page">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`} data-testid="tracker-page">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Date Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-400 rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
           <p className="text-green-100 text-sm">Today, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}</p>
           <h2 className="text-xl font-bold">
             {prayerTimes?.date?.hijri?.day} {prayerTimes?.date?.hijri?.month?.en} {prayerTimes?.date?.hijri?.year} H
@@ -1652,9 +1653,9 @@ const TrackerPage = () => {
         </div>
 
         {/* Prayer Summary */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+        <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4 mb-6`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Prayer Summary</h3>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Prayer Summary</h3>
             <span className="text-green-500 font-medium">{completedPrayers}/5</span>
           </div>
           <div className="flex justify-around">
@@ -1665,7 +1666,7 @@ const TrackerPage = () => {
                 <div key={prayer} className="text-center">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 ${
-                      completed ? "bg-green-500 text-white" : "bg-gray-100 text-gray-400"
+                      completed ? "bg-green-500 text-white" : darkMode ? "bg-gray-700 text-gray-500" : "bg-gray-100 text-gray-400"
                     }`}
                   >
                     {completed ? (
@@ -1676,7 +1677,7 @@ const TrackerPage = () => {
                       <span className="text-xs">○</span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">{prayer}</p>
+                  <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{prayer}</p>
                 </div>
               );
             })}
@@ -1685,19 +1686,19 @@ const TrackerPage = () => {
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Notes */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">Notes</h3>
+          <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4`}>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-3`}>Notes</h3>
             {amals.length > 0 ? (
               <div className="space-y-2 mb-4">
                 {amals.map((amal) => (
                   <div
                     key={amal.id}
-                    className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"}`}
                     onClick={() => toggleAmal(amal.id, amal.completed)}
                   >
                     <div
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        amal.completed ? "bg-green-500 border-green-500" : "border-gray-300"
+                        amal.completed ? "bg-green-500 border-green-500" : darkMode ? "border-gray-500" : "border-gray-300"
                       }`}
                     >
                       {amal.completed && (
@@ -1706,44 +1707,46 @@ const TrackerPage = () => {
                         </svg>
                       )}
                     </div>
-                    <span className={amal.completed ? "line-through text-gray-400" : "text-gray-700"}>
+                    <span className={amal.completed ? "line-through text-gray-400" : darkMode ? "text-gray-200" : "text-gray-700"}>
                       {amal.name}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-400 text-sm mb-4">No amal for today</p>
+              <p className={`${darkMode ? "text-gray-500" : "text-gray-400"} text-sm mb-4`}>No amal for today</p>
             )}
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               onBlur={saveNotes}
               placeholder="Write your daily notes here..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              className={`w-full px-3 py-2 border rounded-lg text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
+                darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+              }`}
               rows={3}
             />
           </div>
 
           {/* Stats & Completion */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-            <h3 className="font-semibold text-gray-800 mb-3">Status & Completion</h3>
+          <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4`}>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-3`}>Status & Completion</h3>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <div className={`w-10 h-10 ${darkMode ? "bg-orange-900/50" : "bg-orange-100"} rounded-full flex items-center justify-center`}>
                   <span className="text-orange-500">🔥</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600">Prayer Streak</p>
-                  <p className="font-semibold text-gray-800">{prayerStats?.completed || 0} prayers</p>
+                  <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>Prayer Streak</p>
+                  <p className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>{prayerStats?.completed || 0} prayers</p>
                 </div>
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Weekly Completion</span>
+                  <span className={darkMode ? "text-gray-400" : "text-gray-600"}>Weekly Completion</span>
                   <span className="text-green-500 font-medium">{prayerStats?.percentage || 0}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className={`w-full ${darkMode ? "bg-gray-700" : "bg-gray-200"} rounded-full h-2`}>
                   <div
                     className="bg-green-500 h-2 rounded-full transition-all"
                     style={{ width: `${prayerStats?.percentage || 0}%` }}
@@ -1752,12 +1755,12 @@ const TrackerPage = () => {
               </div>
               <div>
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-gray-600">Daily Amal</span>
+                  <span className={darkMode ? "text-gray-400" : "text-gray-600"}>Daily Amal</span>
                   <span className="text-green-500 font-medium">
                     {amals.filter(a => a.completed).length}/{amals.length}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className={`w-full ${darkMode ? "bg-gray-700" : "bg-gray-200"} rounded-full h-2`}>
                   <div
                     className="bg-green-500 h-2 rounded-full transition-all"
                     style={{ width: `${amals.length > 0 ? (amals.filter(a => a.completed).length / amals.length * 100) : 0}%` }}
@@ -1769,14 +1772,16 @@ const TrackerPage = () => {
         </div>
 
         {/* Reflections */}
-        <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <h3 className="font-semibold text-gray-800 mb-3">Reflections</h3>
+        <div className={`mt-6 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4`}>
+          <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-3`}>Reflections</h3>
           <textarea
             value={reflections}
             onChange={(e) => setReflections(e.target.value)}
             onBlur={saveNotes}
             placeholder="Write your reflections for today..."
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+            className={`w-full px-3 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
+              darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+            }`}
             rows={4}
           />
         </div>
@@ -1788,6 +1793,7 @@ const TrackerPage = () => {
 // Add Amal Page
 const AddAmalPage = () => {
   const { token } = useAuth();
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
@@ -1795,12 +1801,14 @@ const AddAmalPage = () => {
   const [scheduledTime, setScheduledTime] = useState("");
   const [repeatDaily, setRepeatDaily] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
-      await axios.post(
+      const response = await axios.post(
         `${API}/amal`,
         {
           name,
@@ -1811,30 +1819,40 @@ const AddAmalPage = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      console.log("Amal created:", response.data);
       navigate("/home");
     } catch (err) {
-      console.error(err);
+      console.error("Error creating amal:", err);
+      setError(err.response?.data?.detail || "Failed to create amal");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="add-amal-page">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`} data-testid="add-amal-page">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-2xl">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Add New Amalish</h2>
+        <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-6`}>
+          <h2 className={`text-xl font-bold ${darkMode ? "text-white" : "text-gray-800"} mb-6`}>Add New Amal</h2>
+          
+          {error && (
+            <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-sm">
+              {error}
+            </div>
+          )}
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Amalish Name</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Amal Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
+                  darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+                }`}
                 placeholder="e.g., Baca Dzikir Pagi"
                 required
                 data-testid="amal-name"
@@ -1842,11 +1860,13 @@ const AddAmalPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Notes</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Notes</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none ${
+                  darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+                }`}
                 rows={3}
                 placeholder="Additional notes..."
                 data-testid="amal-notes"
@@ -1854,28 +1874,32 @@ const AddAmalPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">Set Date and Time</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-2`}>Set Date and Time</label>
               <div className="flex space-x-4">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 px-4 py-3 border border-gray-200 rounded-lg">
+                  <div className={`flex items-center space-x-2 px-4 py-3 border rounded-lg ${
+                    darkMode ? "bg-gray-700 border-gray-600" : "border-gray-200"
+                  }`}>
                     <span>📅</span>
                     <input
                       type="date"
                       value={scheduledDate}
                       onChange={(e) => setScheduledDate(e.target.value)}
-                      className="flex-1 outline-none bg-transparent"
+                      className={`flex-1 outline-none bg-transparent ${darkMode ? "text-white" : ""}`}
                       data-testid="amal-date"
                     />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center space-x-2 px-4 py-3 border border-gray-200 rounded-lg">
+                  <div className={`flex items-center space-x-2 px-4 py-3 border rounded-lg ${
+                    darkMode ? "bg-gray-700 border-gray-600" : "border-gray-200"
+                  }`}>
                     <span>⏰</span>
                     <input
                       type="time"
                       value={scheduledTime}
                       onChange={(e) => setScheduledTime(e.target.value)}
-                      className="flex-1 outline-none bg-transparent"
+                      className={`flex-1 outline-none bg-transparent ${darkMode ? "text-white" : ""}`}
                       data-testid="amal-time"
                     />
                   </div>
@@ -1888,7 +1912,7 @@ const AddAmalPage = () => {
                 type="button"
                 onClick={() => setRepeatDaily(!repeatDaily)}
                 className={`w-12 h-6 rounded-full transition-colors ${
-                  repeatDaily ? "bg-green-500" : "bg-gray-300"
+                  repeatDaily ? "bg-green-500" : darkMode ? "bg-gray-600" : "bg-gray-300"
                 }`}
               >
                 <div
@@ -1897,7 +1921,7 @@ const AddAmalPage = () => {
                   }`}
                 ></div>
               </button>
-              <span className="text-gray-700">Repeat Daily</span>
+              <span className={darkMode ? "text-gray-300" : "text-gray-700"}>Repeat Daily</span>
             </div>
 
             <div className="flex space-x-4 pt-4">
@@ -1912,7 +1936,9 @@ const AddAmalPage = () => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className={`flex-1 border py-3 rounded-lg font-semibold transition-colors ${
+                  darkMode ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
               >
                 Cancel
               </button>
