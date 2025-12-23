@@ -1568,6 +1568,7 @@ const ProfilePage = () => {
 const TrackerPage = () => {
   const { token } = useAuth();
   const { darkMode } = useTheme();
+  const navigate = useNavigate();
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [prayerTrack, setPrayerTrack] = useState(null);
   const [amals, setAmals] = useState([]);
@@ -1576,7 +1577,35 @@ const TrackerPage = () => {
   const [notes, setNotes] = useState("");
   const [reflections, setReflections] = useState("");
   const [loading, setLoading] = useState(true);
-  const today = new Date().toISOString().split('T')[0];
+  
+  // Use local date format to avoid timezone issues
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  // Islamic inspirational quotes for reflections
+  const islamicQuotes = [
+    "\"Sesungguhnya sesudah kesulitan itu ada kemudahan.\" - QS. Al-Insyirah: 6",
+    "\"Dan bersabarlah, sesungguhnya Allah beserta orang-orang yang sabar.\" - QS. Al-Anfal: 46",
+    "\"Barangsiapa bertakwa kepada Allah, niscaya Dia akan membukakan jalan keluar baginya.\" - QS. At-Talaq: 2",
+    "\"Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sebelum mereka mengubah keadaan diri mereka sendiri.\" - QS. Ar-Ra'd: 11",
+    "\"Dan mohonlah pertolongan dengan sabar dan shalat.\" - QS. Al-Baqarah: 45",
+    "\"Maka ingatlah kepada-Ku, Aku pun akan ingat kepadamu.\" - QS. Al-Baqarah: 152",
+    "\"Cukuplah Allah bagiku, tidak ada Tuhan selain Dia.\" - QS. At-Taubah: 129",
+    "\"Sesungguhnya bersama kesulitan ada kemudahan.\" - QS. Al-Insyirah: 5",
+    "\"Dan Tuhanmu berfirman: Berdoalah kepada-Ku, niscaya akan Aku perkenankan bagimu.\" - QS. Ghafir: 60",
+    "\"Sebaik-baik manusia adalah yang paling bermanfaat bagi manusia lainnya.\" - HR. Ahmad",
+    "\"Senyummu di hadapan saudaramu adalah sedekah.\" - HR. Tirmidzi",
+    "\"Kebersihan adalah sebagian dari iman.\" - HR. Muslim",
+    "\"Orang mukmin yang kuat lebih baik dan lebih dicintai Allah daripada orang mukmin yang lemah.\" - HR. Muslim",
+    "\"Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah mudahkan baginya jalan menuju surga.\" - HR. Muslim"
+  ];
+
+  const getRandomQuote = () => {
+    const index = Math.floor(Math.random() * islamicQuotes.length);
+    return islamicQuotes[index];
+  };
+
+  const [dailyQuote] = useState(getRandomQuote());
 
   useEffect(() => {
     fetchData();
@@ -1622,6 +1651,17 @@ const TrackerPage = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAmals(amals.map(a => a.id === amalId ? response.data : a));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteAmal = async (amalId) => {
+    try {
+      await axios.delete(`${API}/amal/${amalId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAmals(amals.filter(a => a.id !== amalId));
     } catch (err) {
       console.error(err);
     }
