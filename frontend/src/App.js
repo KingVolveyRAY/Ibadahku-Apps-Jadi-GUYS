@@ -970,6 +970,7 @@ function App() {
             <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
             <Route path="/prayer" element={<ProtectedRoute><PrayerPage /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+            <Route path="/tasbih" element={<ProtectedRoute><TasbihPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/tracker" element={<ProtectedRoute><TrackerPage /></ProtectedRoute>} />
             <Route path="/add-amal" element={<ProtectedRoute><AddAmalPage /></ProtectedRoute>} />
