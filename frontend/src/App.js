@@ -201,6 +201,7 @@ const Header = () => {
   const navItems = [
     { path: "/home", label: "Home", icon: "🏠" },
     { path: "/prayer", label: "Prayer", icon: "🕌" },
+    { path: "/tasbih", label: "Tasbih", icon: "📿" },
     { path: "/calendar", label: "Calendar", icon: "📅" },
   ];
 
