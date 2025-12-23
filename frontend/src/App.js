@@ -988,10 +988,19 @@ const PrayerPage = () => {
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [prayerTrack, setPrayerTrack] = useState(null);
   const [loading, setLoading] = useState(true);
-  const today = new Date().toISOString().split('T')[0];
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // Use local date format
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   useEffect(() => {
     fetchData();
+    // Update current time every minute
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchData = async () => {
@@ -1011,7 +1020,21 @@ const PrayerPage = () => {
     }
   };
 
-  const togglePrayer = async (prayerName) => {
+  // Check if prayer time has passed
+  const isPrayerTimePassed = (prayerTime) => {
+    if (!prayerTime) return false;
+    const [hours, minutes] = prayerTime.split(':').map(Number);
+    const prayerMinutes = hours * 60 + minutes;
+    const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+    return currentMinutes >= prayerMinutes;
+  };
+
+  const togglePrayer = async (prayerName, prayerTime) => {
+    // Check if prayer time has passed
+    if (!isPrayerTimePassed(prayerTime)) {
+      return; // Don't allow checking if time hasn't passed
+    }
+    
     const prayerKey = prayerName.toLowerCase();
     const currentValue = prayerTrack?.[prayerKey] || false;
     
