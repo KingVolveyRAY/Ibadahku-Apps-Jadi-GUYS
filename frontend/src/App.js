@@ -1122,14 +1122,6 @@ const PrayerPage = () => {
 };
 
 // Calendar Page
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-// Calendar Page
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
