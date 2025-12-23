@@ -1414,9 +1414,9 @@ const ProfilePage = () => {
         </div>
 
         {/* Profile Form */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-6`}>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-semibold text-gray-800 text-lg">Account Information</h3>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} text-lg`}>Account Information</h3>
             {!editing ? (
               <button
                 onClick={() => setEditing(true)}
@@ -1429,7 +1429,7 @@ const ProfilePage = () => {
               <div className="space-x-2">
                 <button
                   onClick={() => setEditing(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                  className={`px-4 py-2 border ${darkMode ? "border-gray-600 text-gray-300 hover:bg-gray-700" : "border-gray-300 text-gray-600 hover:bg-gray-50"} rounded-lg transition-colors`}
                 >
                   Cancel
                 </button>
@@ -1447,86 +1447,86 @@ const ProfilePage = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Full Name</label>
               {editing ? (
                 <input
                   type="text"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-200"}`}
                   data-testid="profile-fullname"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700">{user?.full_name}</p>
+                <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-50 text-gray-700"} rounded-lg`}>{user?.full_name}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
-              <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-500">{user?.email}</p>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Email</label>
+              <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-400" : "bg-gray-50 text-gray-500"} rounded-lg`}>{user?.email}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Phone</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Phone</label>
               {editing ? (
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-200"}`}
                   placeholder="+62 xxx xxxx xxxx"
                   data-testid="profile-phone"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700">{user?.phone || "-"}</p>
+                <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-50 text-gray-700"} rounded-lg`}>{user?.phone || "-"}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">Address</label>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Address</label>
               {editing ? (
                 <textarea
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-200"}`}
                   rows={2}
                   placeholder="Your address"
                   data-testid="profile-address"
                 />
               ) : (
-                <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700">{user?.address || "-"}</p>
+                <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-50 text-gray-700"} rounded-lg`}>{user?.address || "-"}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">City</label>
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>City</label>
                 {editing ? (
                   <input
                     type="text"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-200"}`}
                     placeholder="Jakarta"
                     data-testid="profile-city"
                   />
                 ) : (
-                  <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700">{user?.city || "-"}</p>
+                  <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-50 text-gray-700"} rounded-lg`}>{user?.city || "-"}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Country</label>
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Country</label>
                 {editing ? (
                   <input
                     type="text"
                     value={formData.country}
                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "border-gray-200"}`}
                     placeholder="Indonesia"
                     data-testid="profile-country"
                   />
                 ) : (
-                  <p className="px-4 py-3 bg-gray-50 rounded-lg text-gray-700">{user?.country || "Indonesia"}</p>
+                  <p className={`px-4 py-3 ${darkMode ? "bg-gray-700 text-gray-200" : "bg-gray-50 text-gray-700"} rounded-lg`}>{user?.country || "Indonesia"}</p>
                 )}
               </div>
             </div>
@@ -1539,7 +1539,7 @@ const ProfilePage = () => {
             logout();
             navigate("/login");
           }}
-          className="w-full mt-6 py-3 border-2 border-red-500 text-red-500 rounded-xl font-semibold hover:bg-red-50 transition-colors"
+          className={`w-full mt-6 py-3 border-2 border-red-500 text-red-500 rounded-xl font-semibold ${darkMode ? "hover:bg-red-900/30" : "hover:bg-red-50"} transition-colors`}
           data-testid="logout-profile-btn"
         >
           Logout
