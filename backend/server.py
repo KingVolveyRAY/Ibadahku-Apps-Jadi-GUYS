@@ -313,7 +313,8 @@ async def forgot_password(request: ForgotPasswordRequest):
     user = await db.users.find_one({"email": request.email})
     if not user:
         # Don't reveal if email exists or not for security
-        return {"message": "Jika email terdaftar, kode reset telah dikirim", "email_sent": False}
+        # But still return success message
+        return {"message": "Jika email terdaftar, kode reset telah dikirim ke email Anda"}
     
     # Generate reset code
     reset_code = str(uuid.uuid4())[:6].upper()
@@ -336,20 +337,13 @@ async def forgot_password(request: ForgotPasswordRequest):
     
     if email_sent:
         logger.info(f"Password reset email sent to {request.email}")
-        return {
-            "message": "Kode reset telah dikirim ke email Anda",
-            "email_sent": True
-        }
+        return {"message": "Kode reset telah dikirim ke email Anda. Silakan cek inbox atau folder spam."}
     else:
-        # Fallback: return code for development/testing when email fails
-        # In production with verified domain, this won't happen
-        logger.warning(f"Email failed, returning code directly for {request.email}")
-        return {
-            "message": "Email gagal terkirim. Gunakan kode berikut:",
-            "email_sent": False,
-            "code": reset_code,
-            "note": "Untuk mengirim email ke alamat lain, verifikasi domain di resend.com/domains"
-        }
+        logger.error(f"Failed to send password reset email to {request.email}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Gagal mengirim email. Silakan coba lagi nanti."
+        )
 
 @api_router.post("/auth/reset-password")
 async def reset_password(request: ResetPasswordRequest):
