@@ -1174,7 +1174,11 @@ const CalendarPage = () => {
 
   const fetchDailyAmals = async () => {
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      // Use local date format to avoid timezone issues
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       const response = await axios.get(`${API}/amal?date=${dateStr}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
