@@ -1740,47 +1740,100 @@ const TrackerPage = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Notes */}
+          {/* Amal Hari Ini */}
           <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4`}>
-            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-3`}>Notes</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Amal Hari Ini</h3>
+              <button
+                onClick={() => navigate("/add-amal")}
+                className="text-green-500 text-sm font-medium hover:underline"
+              >
+                + Tambah
+              </button>
+            </div>
             {amals.length > 0 ? (
               <div className="space-y-2 mb-4">
                 {amals.map((amal) => (
                   <div
                     key={amal.id}
-                    className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer ${darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"}`}
-                    onClick={() => toggleAmal(amal.id, amal.completed)}
+                    className={`flex items-center justify-between p-3 rounded-lg ${
+                      amal.completed 
+                        ? darkMode ? "bg-green-900/30" : "bg-green-50" 
+                        : darkMode ? "bg-gray-700" : "bg-gray-50"
+                    }`}
                   >
-                    <div
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        amal.completed ? "bg-green-500 border-green-500" : darkMode ? "border-gray-500" : "border-gray-300"
-                      }`}
+                    <div 
+                      className="flex items-center space-x-3 flex-1 cursor-pointer"
+                      onClick={() => toggleAmal(amal.id, amal.completed)}
                     >
-                      {amal.completed && (
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
+                      <div
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                          amal.completed ? "bg-green-500 border-green-500" : darkMode ? "border-gray-500" : "border-gray-300"
+                        }`}
+                      >
+                        {amal.completed && (
+                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <span className={amal.completed ? "line-through text-gray-400" : darkMode ? "text-gray-200" : "text-gray-700"}>
+                          {amal.name}
+                        </span>
+                        {amal.scheduled_time && (
+                          <span className={`ml-2 text-xs ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+                            ⏰ {amal.scheduled_time}
+                          </span>
+                        )}
+                        {amal.notes && (
+                          <p className={`text-xs mt-1 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+                            {amal.notes}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <span className={amal.completed ? "line-through text-gray-400" : darkMode ? "text-gray-200" : "text-gray-700"}>
-                      {amal.name}
-                    </span>
+                    <button
+                      onClick={() => deleteAmal(amal.id)}
+                      className={`p-1 rounded hover:bg-red-100 ${darkMode ? "text-red-400 hover:bg-red-900/30" : "text-red-500"}`}
+                      title="Hapus amal"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className={`${darkMode ? "text-gray-500" : "text-gray-400"} text-sm mb-4`}>No amal for today</p>
+              <div className={`text-center py-6 ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
+                <span className="text-3xl">📝</span>
+                <p className="mt-2 text-sm">Belum ada amal hari ini</p>
+                <button
+                  onClick={() => navigate("/add-amal")}
+                  className="mt-2 text-green-500 text-sm font-medium hover:underline"
+                >
+                  Tambah Amal
+                </button>
+              </div>
             )}
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              onBlur={saveNotes}
-              placeholder="Write your daily notes here..."
-              className={`w-full px-3 py-2 border rounded-lg text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
-                darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
-              }`}
-              rows={3}
-            />
+            
+            {/* Catatan Pribadi */}
+            <div className={`mt-4 pt-4 border-t ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+              <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-2`}>
+                📝 Catatan Pribadi
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                onBlur={saveNotes}
+                placeholder="Tulis catatan harianmu di sini..."
+                className={`w-full px-3 py-2 border rounded-lg text-sm resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
+                  darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+                }`}
+                rows={3}
+              />
+            </div>
           </div>
 
           {/* Stats & Completion */}
