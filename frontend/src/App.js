@@ -1120,19 +1120,8 @@ const PrayerPage = () => {
     </div>
   );
 };
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Sunrise Time */}
-        <div className="mt-4 bg-yellow-50 rounded-xl p-4 border border-yellow-100">
-          <div className="flex items-center space-x-3">
-            <span className="text-2xl">🌅</span>
-            <div>
-              <p className="font-medium text-yellow-800">Terbit</p>
-              <p className="text-sm text-yellow-600">{prayerTimes?.timings?.Terbit}</p>
-            </div>
+// Calendar Page
           </div>
         </div>
       </main>
