@@ -582,7 +582,16 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(`${API}/auth/forgot-password`, { email });
-      setSuccess("Kode reset telah dikirim ke email Anda!");
+      
+      if (response.data.email_sent) {
+        setSuccess("Kode reset telah dikirim ke email Anda! Cek inbox atau folder spam.");
+      } else if (response.data.code) {
+        // Fallback when email fails (for testing/development)
+        setSuccess(`Email gagal terkirim. Kode reset Anda: ${response.data.code}`);
+        setCode(response.data.code);
+      } else {
+        setSuccess(response.data.message);
+      }
       setStep(2);
     } catch (err) {
       setError(err.response?.data?.detail || "Gagal mengirim kode reset");
