@@ -1879,18 +1879,33 @@ const TrackerPage = () => {
           </div>
         </div>
 
-        {/* Reflections */}
-        <div className={`mt-6 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-4`}>
-          <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} mb-3`}>Reflections</h3>
+        {/* Reflections - Kata Penyejuk */}
+        <div className={`mt-6 ${darkMode ? "bg-gradient-to-r from-green-900/50 to-emerald-900/50 border-green-800" : "bg-gradient-to-r from-green-50 to-emerald-50 border-green-100"} rounded-xl shadow-sm border p-4`}>
+          <div className="flex items-center space-x-2 mb-3">
+            <span className="text-xl">🌿</span>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Kata Penyejuk Hari Ini</h3>
+          </div>
+          
+          {/* Auto Generated Quote */}
+          <div className={`p-4 rounded-lg mb-4 ${darkMode ? "bg-gray-800/50" : "bg-white"}`}>
+            <p className={`text-sm italic ${darkMode ? "text-green-300" : "text-green-700"}`}>
+              {dailyQuote}
+            </p>
+          </div>
+          
+          {/* Personal Reflection */}
+          <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-2`}>
+            Refleksi Pribadimu:
+          </label>
           <textarea
             value={reflections}
             onChange={(e) => setReflections(e.target.value)}
             onBlur={saveNotes}
-            placeholder="Write your reflections for today..."
+            placeholder="Apa yang kamu syukuri hari ini? Apa yang ingin kamu perbaiki?"
             className={`w-full px-3 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
-              darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200"
+              darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" : "border-gray-200 bg-white"
             }`}
-            rows={4}
+            rows={3}
           />
         </div>
       </main>
@@ -1905,7 +1920,11 @@ const AddAmalPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
-  const [scheduledDate, setScheduledDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  // Use local date format to avoid timezone issues
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const [scheduledDate, setScheduledDate] = useState(todayStr);
   const [scheduledTime, setScheduledTime] = useState("");
   const [repeatDaily, setRepeatDaily] = useState(false);
   const [loading, setLoading] = useState(false);
