@@ -582,13 +582,10 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     try {
       const response = await axios.post(`${API}/auth/forgot-password`, { email });
-      setSuccess("Reset code sent! Check below for the code (in production, this would be sent via email).");
-      if (response.data.code) {
-        setCode(response.data.code);
-      }
+      setSuccess("Kode reset telah dikirim ke email Anda!");
       setStep(2);
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to send reset code");
+      setError(err.response?.data?.detail || "Gagal mengirim kode reset");
     } finally {
       setLoading(false);
     }
@@ -599,7 +596,12 @@ const ForgotPasswordPage = () => {
     setError("");
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("Password tidak cocok");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setError("Password minimal 6 karakter");
       return;
     }
 
@@ -610,17 +612,21 @@ const ForgotPasswordPage = () => {
         code,
         new_password: newPassword
       });
-      setSuccess("Password reset successfully!");
+      setSuccess("Password berhasil direset!");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.response?.data?.detail || "Failed to reset password");
+      setError(err.response?.data?.detail || "Gagal reset password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gradient-to-b from-green-50 to-white"} flex items-center justify-center p-4`}>
+      <div className="absolute top-4 right-4">
+        <DarkModeToggle />
+      </div>
+      
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-green-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-4">
@@ -628,13 +634,13 @@ const ForgotPasswordPage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Forgot Password?</h1>
-          <p className="text-gray-500 mt-2">
-            {step === 1 ? "Enter your email to reset your password" : "Enter the verification code"}
+          <h1 className={`text-2xl font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>Lupa Password?</h1>
+          <p className={`${darkMode ? "text-gray-400" : "text-gray-500"} mt-2`}>
+            {step === 1 ? "Masukkan email untuk reset password" : "Masukkan kode verifikasi"}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className={`${darkMode ? "bg-gray-800" : "bg-white"} rounded-2xl shadow-xl p-8`}>
           {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 text-sm">{error}</div>
           )}
@@ -645,12 +651,16 @@ const ForgotPasswordPage = () => {
           {step === 1 ? (
             <form onSubmit={handleRequestCode} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Email</label>
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
+                    darkMode 
+                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" 
+                      : "bg-white border-gray-200 text-gray-800"
+                  }`}
                   placeholder="email@example.com"
                   required
                   data-testid="forgot-email"
@@ -662,18 +672,22 @@ const ForgotPasswordPage = () => {
                 className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:opacity-50"
                 data-testid="forgot-submit"
               >
-                {loading ? "Sending..." : "Send Reset Code"}
+                {loading ? "Mengirim..." : "Kirim Kode Reset"}
               </button>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Verification Code</label>
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Kode Verifikasi</label>
                 <input
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-center text-2xl tracking-widest"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-center text-2xl tracking-widest ${
+                    darkMode 
+                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400" 
+                      : "bg-white border-gray-200 text-gray-800"
+                  }`}
                   placeholder="XXXXXX"
                   maxLength={6}
                   required
@@ -681,25 +695,19 @@ const ForgotPasswordPage = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">New Password</label>
-                <input
-                  type="password"
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Password Baru</label>
+                <PasswordInput
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                  placeholder="••••••••"
                   required
                   data-testid="forgot-new-password"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-1">Confirm New Password</label>
-                <input
-                  type="password"
+                <label className={`block text-sm font-medium ${darkMode ? "text-gray-300" : "text-gray-600"} mb-1`}>Konfirmasi Password Baru</label>
+                <PasswordInput
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-                  placeholder="••••••••"
                   required
                   data-testid="forgot-confirm-password"
                 />
@@ -710,14 +718,14 @@ const ForgotPasswordPage = () => {
                 className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors disabled:opacity-50"
                 data-testid="forgot-reset-submit"
               >
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? "Mereset..." : "Reset Password"}
               </button>
             </form>
           )}
 
           <p className="text-center mt-6">
             <Link to="/login" className="text-green-600 font-semibold hover:underline">
-              ← Back to Login
+              ← Kembali ke Login
             </Link>
           </p>
         </div>
