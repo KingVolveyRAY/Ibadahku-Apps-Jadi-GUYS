@@ -1107,27 +1107,62 @@ const PrayerPage = () => {
         <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border overflow-hidden`}>
           <div className={`p-4 border-b ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
             <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Jadwal Shalat Hari Ini</h3>
-            <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Tap untuk menandai sudah shalat</p>
+            <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Tap untuk menandai sudah shalat (hanya bisa setelah waktu shalat tiba)</p>
           </div>
           
           <div className={`divide-y ${darkMode ? "divide-gray-700" : "divide-gray-100"}`}>
-            {prayers.map((prayer) => (
-              <div
-                key={prayer.key}
-                className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${
-                  prayerTrack?.[prayer.key] 
-                    ? darkMode ? "bg-green-900/30" : "bg-green-50" 
-                    : darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
-                }`}
-                onClick={() => togglePrayer(prayer.key)}
-              >
-                <div className="flex items-center space-x-4">
-                  <span className="text-2xl">{prayer.icon}</span>
-                  <div>
-                    <p className={`font-medium ${darkMode ? "text-white" : "text-gray-800"}`}>{prayer.name}</p>
-                    <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{prayer.time}</p>
+            {prayers.map((prayer) => {
+              const timePassed = isPrayerTimePassed(prayer.time);
+              const isCompleted = prayerTrack?.[prayer.key];
+              
+              return (
+                <div
+                  key={prayer.key}
+                  className={`flex items-center justify-between p-4 transition-colors ${
+                    !timePassed 
+                      ? darkMode ? "bg-gray-800/50 opacity-60" : "bg-gray-50/50 opacity-60"
+                      : isCompleted 
+                        ? darkMode ? "bg-green-900/30 cursor-pointer" : "bg-green-50 cursor-pointer" 
+                        : darkMode ? "hover:bg-gray-700 cursor-pointer" : "hover:bg-gray-50 cursor-pointer"
+                  }`}
+                  onClick={() => togglePrayer(prayer.key, prayer.time)}
+                >
+                  <div className="flex items-center space-x-4">
+                    <span className="text-2xl">{prayer.icon}</span>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <p className={`font-medium ${darkMode ? "text-white" : "text-gray-800"}`}>{prayer.name}</p>
+                        {!timePassed && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${darkMode ? "bg-yellow-900/50 text-yellow-400" : "bg-yellow-100 text-yellow-700"}`}>
+                            Belum waktunya
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{prayer.time}</p>
+                    </div>
+                  </div>
+                  <div
+                    className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                      isCompleted
+                        ? "bg-green-500 border-green-500"
+                        : !timePassed
+                          ? darkMode ? "border-gray-600 bg-gray-700" : "border-gray-200 bg-gray-100"
+                          : darkMode ? "border-gray-500" : "border-gray-300"
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : !timePassed ? (
+                      <svg className={`w-4 h-4 ${darkMode ? "text-gray-500" : "text-gray-400"}`} fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                    ) : null}
                   </div>
                 </div>
+              );
+            })}
                 <div
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                     prayerTrack?.[prayer.key]
