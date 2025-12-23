@@ -312,22 +312,37 @@ async def login(user_data: UserLogin):
 async def forgot_password(request: ForgotPasswordRequest):
     user = await db.users.find_one({"email": request.email})
     if not user:
-        # Don't reveal if email exists or not
-        return {"message": "If email exists, a reset code has been sent"}
+        # Don't reveal if email exists or not for security
+        return {"message": "Jika email terdaftar, kode reset telah dikirim"}
     
-    # Generate reset code (in production, send via email)
+    # Generate reset code
     reset_code = str(uuid.uuid4())[:6].upper()
     
+    # Save reset code to database with expiration
     await db.password_resets.update_one(
         {"email": request.email},
-        {"$set": {"code": reset_code, "created_at": datetime.now(timezone.utc).isoformat()}},
+        {
+            "$set": {
+                "code": reset_code, 
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=15)).isoformat()
+            }
+        },
         upsert=True
     )
     
-    # In production, send email here
-    logger.info(f"Password reset code for {request.email}: {reset_code}")
+    # Send email using Resend
+    email_sent = send_reset_email(request.email, reset_code)
     
-    return {"message": "If email exists, a reset code has been sent", "code": reset_code}
+    if email_sent:
+        logger.info(f"Password reset email sent to {request.email}")
+        return {"message": "Kode reset telah dikirim ke email Anda"}
+    else:
+        logger.error(f"Failed to send password reset email to {request.email}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Gagal mengirim email. Silakan coba lagi."
+        )
 
 @api_router.post("/auth/reset-password")
 async def reset_password(request: ResetPasswordRequest):
@@ -339,8 +354,18 @@ async def reset_password(request: ResetPasswordRequest):
     if not reset_record:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid reset code"
+            detail="Kode reset tidak valid"
         )
+    
+    # Check if code expired
+    if reset_record.get("expires_at"):
+        expires_at = datetime.fromisoformat(reset_record["expires_at"].replace("Z", "+00:00"))
+        if datetime.now(timezone.utc) > expires_at:
+            await db.password_resets.delete_one({"email": request.email})
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Kode reset sudah kadaluarsa. Silakan minta kode baru."
+            )
     
     # Update password
     await db.users.update_one(
@@ -351,7 +376,7 @@ async def reset_password(request: ResetPasswordRequest):
     # Delete reset record
     await db.password_resets.delete_one({"email": request.email})
     
-    return {"message": "Password reset successfully"}
+    return {"message": "Password berhasil direset"}
 
 # ==================== USER ROUTES ====================
 
