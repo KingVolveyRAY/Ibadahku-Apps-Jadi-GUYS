@@ -967,6 +967,7 @@ function App() {
 // Prayer Page
 const PrayerPage = () => {
   const { token } = useAuth();
+  const { darkMode } = useTheme();
   const [prayerTimes, setPrayerTimes] = useState(null);
   const [prayerTrack, setPrayerTrack] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1018,7 +1019,7 @@ const PrayerPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
         <Header />
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
@@ -1036,12 +1037,12 @@ const PrayerPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="prayer-page">
+    <div className={`min-h-screen ${darkMode ? "bg-gray-900" : "bg-gray-50"}`} data-testid="prayer-page">
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Date Header */}
-        <div className="bg-gradient-to-r from-green-500 to-green-400 rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-100 text-sm">Today</p>
@@ -1063,33 +1064,35 @@ const PrayerPage = () => {
         </div>
 
         {/* Prayer Times List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100">
-            <h3 className="font-semibold text-gray-800">Jadwal Shalat Hari Ini</h3>
-            <p className="text-sm text-gray-500">Tap untuk menandai sudah shalat</p>
+        <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border overflow-hidden`}>
+          <div className={`p-4 border-b ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"}`}>Jadwal Shalat Hari Ini</h3>
+            <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Tap untuk menandai sudah shalat</p>
           </div>
           
-          <div className="divide-y divide-gray-100">
+          <div className={`divide-y ${darkMode ? "divide-gray-700" : "divide-gray-100"}`}>
             {prayers.map((prayer) => (
               <div
                 key={prayer.key}
-                className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  prayerTrack?.[prayer.key] ? "bg-green-50" : ""
+                className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${
+                  prayerTrack?.[prayer.key] 
+                    ? darkMode ? "bg-green-900/30" : "bg-green-50" 
+                    : darkMode ? "hover:bg-gray-700" : "hover:bg-gray-50"
                 }`}
                 onClick={() => togglePrayer(prayer.key)}
               >
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl">{prayer.icon}</span>
                   <div>
-                    <p className="font-medium text-gray-800">{prayer.name}</p>
-                    <p className="text-sm text-gray-500">{prayer.time}</p>
+                    <p className={`font-medium ${darkMode ? "text-white" : "text-gray-800"}`}>{prayer.name}</p>
+                    <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{prayer.time}</p>
                   </div>
                 </div>
                 <div
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                     prayerTrack?.[prayer.key]
                       ? "bg-green-500 border-green-500"
-                      : "border-gray-300"
+                      : darkMode ? "border-gray-500" : "border-gray-300"
                   }`}
                 >
                   {prayerTrack?.[prayer.key] && (
@@ -1098,6 +1101,25 @@ const PrayerPage = () => {
                     </svg>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sunrise Time */}
+        <div className={`mt-4 ${darkMode ? "bg-yellow-900/30 border-yellow-800" : "bg-yellow-50 border-yellow-100"} rounded-xl p-4 border`}>
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">🌅</span>
+            <div>
+              <p className={`font-medium ${darkMode ? "text-yellow-300" : "text-yellow-800"}`}>Terbit</p>
+              <p className={`text-sm ${darkMode ? "text-yellow-400" : "text-yellow-600"}`}>{prayerTimes?.timings?.Terbit}</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
               </div>
             ))}
           </div>
