@@ -148,12 +148,35 @@ export const TrackerPage = () => {
         {/* Location Banner */}
         <LocationBanner />
         
-        {/* Date Header */}
-        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
-          <p className="text-green-100 text-sm">Today, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long' })}</p>
-          <h2 className="text-xl font-bold">
-            {prayerTimes?.date?.hijri?.day} {prayerTimes?.date?.hijri?.month?.en} {prayerTimes?.date?.hijri?.year} H
-          </h2>
+        {/* Beautiful Header Card */}
+        <div className={`${darkMode ? "bg-gradient-to-r from-purple-700 via-pink-600 to-rose-500" : "bg-gradient-to-r from-purple-500 via-pink-500 to-rose-400"} rounded-2xl p-6 text-white mb-6 shadow-lg relative overflow-hidden`}>
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          
+          <div className="relative">
+            <div className="flex items-center space-x-3 mb-2">
+              <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                <span className="text-2xl">✨</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold">Tracker Amal</h1>
+                <p className="text-white/80 text-sm">Pantau perjalanan ibadahmu</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <p className="text-white/70 text-sm">Hari ini</p>
+                <p className="font-medium">{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+              </div>
+              {prayerTimes?.date?.hijri && (
+                <div className="text-right">
+                  <p className="text-white/70 text-sm">Hijriah</p>
+                  <p className="font-medium">{prayerTimes.date.hijri.day} {prayerTimes.date.hijri.month.en} {prayerTimes.date.hijri.year} H</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Prayer Summary */}
