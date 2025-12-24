@@ -47,16 +47,22 @@ export const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-2">
-          {/* Location indicator */}
-          <div className="hidden sm:flex items-center space-x-1 text-xs bg-white/10 px-2 py-1 rounded-lg">
+          {/* Location indicator with click to refresh */}
+          <button
+            onClick={refreshLocation}
+            className="hidden sm:flex items-center space-x-1 text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+            title="Klik untuk perbarui lokasi"
+          >
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
             </svg>
             <span className="truncate max-w-[80px]">{userLocation?.city || "Jakarta"}</span>
-            {permissionStatus === "granted" && (
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+            {permissionStatus === "granted" ? (
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+            ) : (
+              <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full"></span>
             )}
-          </div>
+          </button>
           
           <DarkModeToggle className="mr-2" />
           
