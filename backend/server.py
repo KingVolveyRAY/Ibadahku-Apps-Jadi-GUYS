@@ -56,45 +56,52 @@ logger = logging.getLogger(__name__)
 # ==================== EMAIL HELPER ====================
 
 def send_reset_email(to_email: str, reset_code: str):
-    """Send password reset email using Resend"""
+    """Send password reset email using Brevo"""
     try:
-        params = {
-            "from": "IbadahKu <onboarding@resend.dev>",
-            "to": [to_email],
-            "subject": "🕌 Kode Reset Password - IbadahKu",
-            "html": f"""
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <h1 style="color: #22c55e; margin: 0;">🕌 IbadahKu</h1>
-                    <p style="color: #666;">Aplikasi Ibadah Harian</p>
-                </div>
-                
-                <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: white; margin: 0 0 10px 0;">Kode Reset Password</h2>
-                    <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0;">Gunakan kode berikut untuk mereset password Anda:</p>
-                    <div style="background: white; padding: 20px; border-radius: 10px; display: inline-block;">
-                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #22c55e;">{reset_code}</span>
-                    </div>
-                </div>
-                
-                <div style="background: #f9fafb; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                    <p style="color: #666; margin: 0; font-size: 14px;">
-                        ⚠️ Kode ini akan kadaluarsa dalam <strong>15 menit</strong>.<br><br>
-                        Jika Anda tidak meminta reset password, abaikan email ini.
-                    </p>
-                </div>
-                
-                <div style="text-align: center; color: #999; font-size: 12px;">
-                    <p>Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
-                    <p>© 2025 IbadahKu. All rights reserved.</p>
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(brevo_config))
+        
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #22c55e; margin: 0;">🕌 IbadahKu</h1>
+                <p style="color: #666;">Aplikasi Ibadah Harian</p>
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 20px;">
+                <h2 style="color: white; margin: 0 0 10px 0;">Kode Reset Password</h2>
+                <p style="color: rgba(255,255,255,0.9); margin: 0 0 20px 0;">Gunakan kode berikut untuk mereset password Anda:</p>
+                <div style="background: white; padding: 20px; border-radius: 10px; display: inline-block;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #22c55e;">{reset_code}</span>
                 </div>
             </div>
-            """
-        }
+            
+            <div style="background: #f9fafb; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <p style="color: #666; margin: 0; font-size: 14px;">
+                    ⚠️ Kode ini akan kadaluarsa dalam <strong>15 menit</strong>.<br><br>
+                    Jika Anda tidak meminta reset password, abaikan email ini.
+                </p>
+            </div>
+            
+            <div style="text-align: center; color: #999; font-size: 12px;">
+                <p>Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+                <p>© 2025 IbadahKu. All rights reserved.</p>
+            </div>
+        </div>
+        """
         
-        email_response = resend.Emails.send(params)
-        logger.info(f"Reset email sent to {to_email}: {email_response}")
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": to_email}],
+            sender={"name": "IbadahKu", "email": BREVO_SENDER_EMAIL},
+            subject="🕌 Kode Reset Password - IbadahKu",
+            html_content=html_content
+        )
+        
+        api_response = api_instance.send_transac_email(send_smtp_email)
+        logger.info(f"Reset email sent to {to_email}: {api_response}")
         return True
+    except ApiException as e:
+        logger.error(f"Brevo API Exception when sending email to {to_email}: {e}")
+        return False
     except Exception as e:
         logger.error(f"Failed to send reset email to {to_email}: {e}")
         return False
