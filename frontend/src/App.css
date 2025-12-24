@@ -319,3 +319,32 @@ button {
     padding-bottom: max(0px, env(safe-area-inset-bottom));
   }
 }
+
+/* Modal animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.animate-fadeIn > div {
+  animation: modalSlideUp 0.3s ease-out;
+}
