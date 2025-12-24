@@ -6,16 +6,17 @@ import { DarkModeToggle } from "./DarkModeToggle";
 export const Header = () => {
   const { user, logout } = useAuth();
   const { darkMode } = useTheme();
-  const { location: userLocation, permissionStatus } = useLocation();
+  const { location: userLocation, permissionStatus, refreshLocation } = useLocation();
   const navigate = useNavigate();
   const routerLocation = useRouterLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const navItems = [
     { path: "/home", label: "Home", icon: "🏠" },
-    { path: "/prayer", label: "Prayer", icon: "🕌" },
+    { path: "/prayer", label: "Shalat", icon: "🕌" },
     { path: "/tasbih", label: "Tasbih", icon: "📿" },
-    { path: "/calendar", label: "Calendar", icon: "📅" },
+    { path: "/tracker", label: "Tracker", icon: "✨" },
+    { path: "/calendar", label: "Kalender", icon: "📅" },
   ];
 
   return (
