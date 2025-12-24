@@ -41,15 +41,50 @@ export const ProfilePage = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-6 max-w-2xl">
-        {/* Profile Header */}
-        <div className={`${darkMode ? "bg-gradient-to-r from-green-700 to-green-600" : "bg-gradient-to-r from-green-500 to-green-400"} rounded-2xl p-6 text-white mb-6 shadow-lg`}>
-          <div className="flex items-center space-x-4">
-            <div className={`w-20 h-20 ${darkMode ? "bg-gray-700" : "bg-white"} rounded-full flex items-center justify-center ${darkMode ? "text-green-400" : "text-green-500"} text-3xl font-bold`}>
-              {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+        {/* Profile Header - Beautiful Gradient */}
+        <div className={`${darkMode ? "bg-gradient-to-br from-green-600 via-emerald-500 to-teal-500" : "bg-gradient-to-br from-green-400 via-emerald-400 to-teal-400"} rounded-2xl p-6 text-white mb-6 shadow-lg relative overflow-hidden`}>
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          <div className="absolute top-1/2 right-10 w-20 h-20 bg-white/5 rounded-full"></div>
+          
+          <div className="relative flex flex-col items-center text-center py-4">
+            {/* Profile Avatar with gradient ring */}
+            <div className="relative mb-4">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-white/30 to-white/10 p-1">
+                <div className={`w-full h-full ${darkMode ? "bg-gray-800" : "bg-white"} rounded-full flex items-center justify-center shadow-lg`}>
+                  <span className={`text-4xl font-bold ${darkMode ? "text-green-400" : "text-green-500"}`}>
+                    {user?.full_name?.charAt(0)?.toUpperCase() || "U"}
+                  </span>
+                </div>
+              </div>
+              {/* Online indicator */}
+              <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white"></div>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold">{user?.full_name}</h2>
-              <p className="text-green-100">{user?.email}</p>
+            
+            <h2 className="text-2xl font-bold mb-1">{user?.full_name}</h2>
+            <p className="text-white/80 text-sm mb-3">{user?.email}</p>
+            
+            {/* Stats Row */}
+            <div className="flex items-center space-x-6 mt-2">
+              <div className="text-center">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-1">
+                  <span className="text-lg">🕌</span>
+                </div>
+                <p className="text-xs text-white/70">Member</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-1">
+                  <span className="text-lg">⭐</span>
+                </div>
+                <p className="text-xs text-white/70">Active</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-1">
+                  <span className="text-lg">🌙</span>
+                </div>
+                <p className="text-xs text-white/70">IbadahKu</p>
+              </div>
             </div>
           </div>
         </div>
@@ -57,14 +92,21 @@ export const ProfilePage = () => {
         {/* Profile Form */}
         <div className={`${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"} rounded-xl shadow-sm border p-6`}>
           <div className="flex items-center justify-between mb-6">
-            <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} text-lg`}>Account Information</h3>
+            <div className="flex items-center space-x-3">
+              <div className={`w-10 h-10 rounded-lg ${darkMode ? "bg-green-900/50" : "bg-green-100"} flex items-center justify-center`}>
+                <svg className={`w-5 h-5 ${darkMode ? "text-green-400" : "text-green-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h3 className={`font-semibold ${darkMode ? "text-white" : "text-gray-800"} text-lg`}>Informasi Akun</h3>
+            </div>
             {!editing ? (
               <button
                 onClick={() => setEditing(true)}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg"
                 data-testid="edit-profile-btn"
               >
-                Edit Profile
+                ✏️ Edit Profile
               </button>
             ) : (
               <div className="space-x-2">
