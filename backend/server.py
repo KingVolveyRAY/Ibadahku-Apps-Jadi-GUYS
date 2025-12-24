@@ -13,7 +13,8 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import httpx
-import resend
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -34,8 +35,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Security
 security = HTTPBearer()
 
-# Resend Email Configuration
-resend.api_key = os.environ.get('RESEND_API_KEY')
+# Brevo Email Configuration
+brevo_config = sib_api_v3_sdk.Configuration()
+brevo_config.api_key['api-key'] = os.environ.get('BREVO_API_KEY')
+BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', 'ibadahku.co.id@gmail.com')
 
 # Create the main app
 app = FastAPI(title="IbadahKu API", version="1.0.0")
