@@ -1,7 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider, AuthProvider, LocationProvider } from "@/context";
-import { ProtectedRoute } from "@/components/common";
+import { ProtectedRoute, LocationPermissionModal } from "@/components/common";
 import {
   LoginPage,
   RegisterPage,
@@ -21,6 +21,7 @@ function App() {
       <AuthProvider>
         <LocationProvider>
           <BrowserRouter>
+            <LocationPermissionModal />
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
