@@ -1,0 +1,10 @@
+export { LoginPage } from './LoginPage';
+export { RegisterPage } from './RegisterPage';
+export { ForgotPasswordPage } from './ForgotPasswordPage';
+export { HomePage } from './HomePage';
+export { PrayerPage } from './PrayerPage';
+export { CalendarPage } from './CalendarPage';
+export { ProfilePage } from './ProfilePage';
+export { TrackerPage } from './TrackerPage';
+export { AddAmalPage } from './AddAmalPage';
+export { TasbihPage } from './TasbihPage';
